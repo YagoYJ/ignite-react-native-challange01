@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 
 import { Header } from "../components/Header";
 import { Task, TasksList } from "../components/TasksList";
@@ -9,10 +9,15 @@ export function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   function handleAddTask(newTaskTitle: string) {
+    const taskAlreadyAdded = tasks.find((task) => task.title === newTaskTitle);
+
+    if (taskAlreadyAdded)
+      return Alert.alert("Aviso!", "Você já adicionou essa task");
+
     setTasks((oldTasks) => [
       ...oldTasks,
       {
-        id: Math.random() * 10,
+        id: new Date().getTime(),
         done: false,
         title: newTaskTitle,
       },
@@ -20,12 +25,15 @@ export function Home() {
   }
 
   function handleToggleTaskDone(id: number) {
+    const currentTask = tasks.find((task) => task.id === id);
+
+    if (!currentTask) return;
+
+    currentTask.done = !currentTask.done;
+
     const newTasksArray = tasks.map((task) => {
       if (task.id === id) {
-        return {
-          ...task,
-          done: !task.done,
-        };
+        return currentTask;
       } else {
         return task;
       }
@@ -35,13 +43,7 @@ export function Home() {
   }
 
   function handleRemoveTask(id: number) {
-    let newTasksArray: Task[] = [];
-
-    tasks.map((task) => {
-      if (task.id !== id) {
-        newTasksArray.push(task);
-      }
-    });
+    const newTasksArray = tasks.filter((task) => task.id !== id);
 
     setTasks(newTasksArray);
   }
